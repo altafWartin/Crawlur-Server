@@ -11,7 +11,7 @@ const app = express(); // Initialize app before using it
 // Use the cors middleware
 app.use(
   cors({
-    origin: "http://localhost:3000", // Allow requests from this origin
+    origin: "https://jqyq2t-3000.csb.app", // Allow requests from this origin
   })
 );
 
