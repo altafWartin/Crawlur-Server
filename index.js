@@ -8,12 +8,10 @@ const cors = require("cors"); // Import cors
 
 const app = express(); // Initialize app before using it
 
-// Use the cors middleware
-app.use(
-  cors({
-    origin: "https://jqyq2t-3000.csb.app", // Allow requests from this origin
-  })
-);
+app.use(cors())
+
+
+
 
 app.use(bodyParser.json());
 const PORT = 8866;
