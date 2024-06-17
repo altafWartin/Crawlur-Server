@@ -8,12 +8,7 @@ const cors = require("cors"); // Import cors
 
 const app = express(); // Initialize app before using it
 
-// Use the cors middleware
-app.use(
-  cors({
-    origin: "https://jqyq2t-3000.csb.app", // Allow requests from this origin
-  })
-);
+app.use(cors());
 
 app.use(bodyParser.json());
 const PORT = 8866;
@@ -40,7 +35,7 @@ async function handleSearch(req, res) {
           Connection: "keep-alive",
           "Accept-Encoding": "gzip, deflate, br",
         },
-      }
+      },
     );
     res.json(response.data);
   } catch (error) {
@@ -61,12 +56,12 @@ async function handleProductInfo(req, res) {
           Connection: "keep-alive",
           "Accept-Encoding": "gzip, deflate, br",
         },
-      }
+      },
     );
     console.log(response);
     if (response.data?.product.description) {
       productInformation.push(
-        await rewriteDescription(response.data.product.description)
+        await rewriteDescription(response.data.product.description),
       );
     }
     if (response.data?.product.top_reviews.length > 0) {
@@ -185,56 +180,56 @@ app.get("/product/:asin", async (req, res) => {
 
 // API endpoint to get product by ASIN
 app.get("/productt/:asin", async (req, res) => {
-    try {
-      const { asin } = req.params;
-      const filePath = path.join(__dirname, "data", "product.json");
-      const products = await readJsonFile(filePath);
-  
-      if (!products || !products.product) {
-        return res.status(404).json({ error: "Product not found" });
-      }
-  
-      // Initialize arrays to hold additional information
-      let productInformation = [];
-      let reviews = [];
-  
-      // Rewrite the product description if available
-      if (products.product.description) {
-        productInformation.push(
-          await rewriteDescription(products.product.description)
-        );
-      }
-  
-      // Rewrite reviews if available
-      if (
-        products.product.top_reviews &&
-        products.product.top_reviews.length > 0
-      ) {
-        reviews = await rewriteReviews(products);
-      }
-  
-      // Parse JSON strings to objects if they are strings
-      if (typeof productInformation === 'string') {
-        productInformation = JSON.parse(productInformation);
-      }
-      if (typeof reviews === 'string') {
-        reviews = JSON.parse(reviews);
-      }
-  
-      // Construct the response object
-      const response = {
-        products,
-        productInformation,
-        reviews,
-      };
-  
-      res.json(response);
-    } catch (error) {
-      console.error("Error fetching product:", error);
-      res.status(500).json({ error: "Failed to fetch product" });
+  try {
+    const { asin } = req.params;
+    const filePath = path.join(__dirname, "data", "product.json");
+    const products = await readJsonFile(filePath);
+
+    if (!products || !products.product) {
+      return res.status(404).json({ error: "Product not found" });
     }
-  });
-  
+
+    // Initialize arrays to hold additional information
+    let productInformation = [];
+    let reviews = [];
+
+    // Rewrite the product description if available
+    if (products.product.description) {
+      productInformation.push(
+        await rewriteDescription(products.product.description),
+      );
+    }
+
+    // Rewrite reviews if available
+    if (
+      products.product.top_reviews &&
+      products.product.top_reviews.length > 0
+    ) {
+      reviews = await rewriteReviews(products);
+    }
+
+    // Parse JSON strings to objects if they are strings
+    if (typeof productInformation === "string") {
+      productInformation = JSON.parse(productInformation);
+    }
+    if (typeof reviews === "string") {
+      reviews = JSON.parse(reviews);
+    }
+
+    // Construct the response object
+    const response = {
+      products,
+      productInformation,
+      reviews,
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    res.status(500).json({ error: "Failed to fetch product" });
+  }
+});
+
 app.post("/search", handleSearch);
 app.post("/product-info", handleProductInfo);
 app.post("/rewrite-description", rewriteDescription);
