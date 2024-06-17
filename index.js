@@ -4,11 +4,28 @@ const bodyParser = require("body-parser");
 const { OpenAI } = require("openai");
 const fs = require("fs");
 const path = require("path");
-const cors = require("cors"); // Import cors
+const cors = require("cors");
 
-const app = express(); // Initialize app before using it
+const app = express();
 
-app.use(cors());
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://jqyq2t-3000.csb.app',
+  'https://nzsxdl-8866.csb.app'
+]; // Add your frontend URLs here
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 
 app.use(bodyParser.json());
 const PORT = 8866;
