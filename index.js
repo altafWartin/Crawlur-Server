@@ -394,6 +394,9 @@ app.post("/get-youtube-shorts", getYoutubeShorts);
 app.post("/search", handleSearch);
 app.post("/product-info", handleProductInfo);
 app.post("/rewrite-description", rewriteDescription);
+app.get("/", (req, res) => {
+  res.json({ message: "hello" });
+});
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
