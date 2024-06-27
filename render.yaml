@@ -1,11 +1,10 @@
-# Exported from Render on 2024-06-27T08:09:57Z
 services:
-- type: web
-  name: Crawlur-Server
-  runtime: node
-  repo: https://github.com/altafWartin/Crawlur-Server
-  plan: free
-  region: oregon
-  buildCommand: npm
-  startCommand: npx nodemon index.js
+  - type: web
+    name: Crawlur-Server
+    runtime: node
+    repo: https://github.com/altafWartin/Crawlur-Server
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: node index.js
 version: "1"
