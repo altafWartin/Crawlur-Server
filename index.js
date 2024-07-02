@@ -181,88 +181,6 @@ const readJsonFile = (filePath) => {
   });
 };
 
-// Get all products
-app.get("/products", async (req, res) => {
-  try {
-    const filePath = path.join(__dirname, "data", "data.json");
-    const products = await readJsonFile(filePath);
-
-    res.json(products);
-  } catch (error) {
-    console.error("Error fetching products:", error); // Log the error
-    res.status(500).json({ error: "Failed to fetch products" });
-  }
-});
-
-// API endpoint to get product by ASIN
-app.get("/product/:asin", async (req, res) => {
-  const { asin } = req.params;
-  const filePath = path.join(__dirname, "data", "product.json");
-  const products = await readJsonFile(filePath);
-
-  res.json(products);
-});
-
-// API endpoint to get product by ASIN
-
-// API endpoint to get product by ASIN
-
-// Endpoint to fetch product information by ASIN
-
-// Endpoint to fetch product information by ASIN
-app.get("/productt/:asin", async (req, res) => {
-  try {
-    const { asin } = req.params;
-    const filePath = path.join(__dirname, "data", "product.json");
-    const products = await readJsonFile(filePath);
-
-    if (!products || !products.product) {
-      return res.status(404).json({ error: "Product not found" });
-    }
-
-    // Initialize arrays to hold additional information
-    let productInformation = [];
-    let reviews = [];
-
-    // Rewrite the product description if available
-    if (products.product.description) {
-      const rewrittenDescription = await rewriteDescription(
-        products.product.description
-      );
-      productInformation.push(rewrittenDescription[0]);
-    }
-
-    // Rewrite reviews if available
-    if (
-      products.product.top_reviews &&
-      products.product.top_reviews.length > 0
-    ) {
-      reviews = await rewriteReviews(products);
-    }
-    console.log("hello");
-    console.log(products.product.title);
-    // Search YouTube shorts related to the product
-    const keyword = products.product.title; // Use product name as keyword
-    const maxResults = 5; // Number of shorts to retrieve
-    const youtubeShorts = await searchYouTubeShorts(keyword, maxResults);
-    const youtubeVideos = await searchYouTubeVideos(keyword, maxResults);
-
-    // Construct the response object
-    const response = {
-      products,
-      productInformation,
-      reviews,
-      youtubeShorts: JSON.parse(youtubeShorts), // Parse the JSON returned from searchYouTubeShorts
-      youtubeVideos: JSON.parse(youtubeVideos), // Parse the JSON returned from searchYouTubeShorts
-    };
-
-    res.json(response);
-  } catch (error) {
-    console.error("Error fetching product:", error);
-    res.status(500).json({ error: "Failed to fetch product" });
-  }
-});
-
 async function getYoutubeShorts(req, res) {
   res
     .send(
@@ -387,6 +305,141 @@ function convertToSeconds(duration) {
   );
 }
 
+// Get all products
+app.get("/products", async (req, res) => {
+  try {
+    const filePath = path.join(__dirname, "data", "data.json");
+    const products = await readJsonFile(filePath);
+
+    res.json(products);
+  } catch (error) {
+    console.error("Error fetching products:", error); // Log the error
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
+});
+
+// API endpoint to get product by ASIN
+app.get("/product/:asin", async (req, res) => {
+  const { asin } = req.params;
+  const filePath = path.join(__dirname, "data", "product.json");
+  const products = await readJsonFile(filePath);
+
+  res.json(products);
+});
+
+
+
+
+
+const readJsonFilee = async (filePath) => {
+  const data = await fs.promises.readFile(filePath, "utf8");
+  return JSON.parse(data);
+};
+
+const convertImageToBase64 = async (url) => {
+  try {
+    const response = await axios.get(url, { responseType: "arraybuffer" });
+    const buffer = Buffer.from(response.data, "binary");
+    return buffer.toString("base64");
+  } catch (error) {
+    console.error(`Error fetching image from ${url}:`, error);
+    return null;
+  }
+};
+
+app.get("/productt/:asin", async (req, res) => {
+  try {
+    console.log("1");
+    const { asin } = req.params;
+    const filePath = path.join(__dirname, "data", "product.json");
+    const products = await readJsonFilee(filePath);
+    console.log("2");
+
+    if (!products || !products.product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+    console.log("3");
+
+    const instagramFilePath = path.join(__dirname, "data", "instagram.json");
+    const tiktokFilePath = path.join(__dirname, "data", "tiktok.json");
+    const twitterFilePath = path.join(__dirname, "data", "twitter.json");
+    console.log("4");
+
+    const instagramData = await readJsonFile(instagramFilePath);
+    const tiktokData = await readJsonFile(tiktokFilePath);
+    const twitterData = await readJsonFile(twitterFilePath);
+    console.log("5");
+
+   
+    // Convert Instagram images to base64
+    for (const item of instagramData) {
+      if (item.displayUrl) {
+        item.base64Image = await convertImageToBase64(item.displayUrl);
+      }
+    }
+
+    // Convert TikTok images to base64
+    for (const item of tiktokData) {
+      if (item.displayUrl) {
+        item.base64Image = await convertImageToBase64(item.displayUrl);
+      }
+    }
+
+    // Convert Twitter images to base64
+    for (const item of twitterData) {
+      if (item.twitterUrl) {
+        item.base64Image = await convertImageToBase64(item.twitterUrl);
+      }
+    }
+    console.log("6");
+    // Uncomment and adapt the code below if you need to process descriptions and reviews
+    // let productInformation = [];
+    // let reviews = [];
+
+    // if (products.product.description) {
+    //   const rewrittenDescription = await rewriteDescription(
+    //     products.product.description
+    //   );
+    //   productInformation.push(rewrittenDescription[0]);
+    // }
+    console.log("7");
+
+    // if (
+    //   products.product.top_reviews &&
+    //   products.product.top_reviews.length > 0
+    // ) {
+    //   reviews = await rewriteReviews(products);
+    // }
+    console.log("hello");
+    console.log("1");
+
+    console.log(products.product.title);
+    // Search YouTube shorts related to the product
+    const keyword = products.product.title; // Use product name as keyword
+    const maxResults = 5; // Number of shorts to retrieve
+    // const youtubeShorts = await searchYouTubeShorts(keyword, maxResults);
+    // const youtubeVideos = await searchYouTubeVideos(keyword, maxResults);
+    console.log("8");
+
+    // Construct the response object
+    const response = {
+      products,
+      // productInformation,
+      // reviews,
+      // youtubeShorts,
+      // youtubeVideos,
+      instagramData,
+      tiktokData,
+      twitterData,
+    };
+    console.log("9");
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    res.status(500).json({ error: "Failed to fetch product" });
+  }
+});
 
 // app.post('/rewrite-description', rewriteDescription);
 app.post("/get-youtube-shorts", getYoutubeShorts);
