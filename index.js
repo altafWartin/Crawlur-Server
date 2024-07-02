@@ -391,6 +391,7 @@ app.get("/productt/:asin", async (req, res) => {
         item.base64Image = await convertImageToBase64(item.twitterUrl);
       }
     }
+    
     console.log("6");
     // Uncomment and adapt the code below if you need to process descriptions and reviews
     // let productInformation = [];
