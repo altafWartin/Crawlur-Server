@@ -15,7 +15,7 @@ const PORT = 8866;
 
 const API_KEY = "CFA1B942C9A54AED89BB9A48DE152C5B";
 const OPENAI_API_KEY =
-  "sk-crawlur-engine-pQMiNzu4XFr8vBodXEHKT3BlbkFJKIv4r1NuLEWgS2iiytGN";
+  "sk-proj-ON7FKD58K2nJhK8hIdF3T3BlbkFJSjmx1VlJA67fDRPXnEjV";
 const OPENAI_CONFIG = {
   model: "gpt-4o",
   max_tokens: 4096,
@@ -23,7 +23,7 @@ const OPENAI_CONFIG = {
   top_p: 1.0,
 };
 
-const YOUTUBE_API_KEY = "AIzaSyBEMRtzMlIPRXMGgRPx6QsSD8ketzo027w";
+const YOUTUBE_API_KEY = "AIzaSyA6QfBndPd2ywM6bp-bxtUEEN2ruCOb4SY";
 const YOUTUBE_API_SEARCH_URL = "https://www.googleapis.com/youtube/v3/search";
 const YOUTUBE_API_VIDEO_URL = "https://www.googleapis.com/youtube/v3/videos";
 let finalDetails = [];
@@ -189,35 +189,40 @@ async function getYoutubeShorts(req, res) {
     .status(200);
 }
 
+
 async function searchYouTubeShorts(keyword, maxResults = 5) {
   try {
     const response = await axios.get(YOUTUBE_API_SEARCH_URL, {
       params: {
-        part: "snippet",
+        part: 'snippet',
         q: keyword,
-        type: "video",
-        videoDuration: "short",
-        maxWidth: 1080,
-        maxHeight: 1920,
+        type: 'video',
+        videoDuration: 'short',
         maxResults: maxResults,
         key: YOUTUBE_API_KEY,
       },
     });
+
     if (response.data.items.length === 0) {
-      throw new Error("No shorts found with the given keyword");
+      throw new Error('No shorts found with the given keyword');
     }
+
     const videos = response.data.items.map((item) => ({
       video_id: item.id.videoId,
     }));
+
+    const finalDetails = [];
     for (const video of videos) {
       finalDetails.push(await getVideoDetail(video.video_id));
     }
-    return JSON.stringify(finalDetails, null, 2);
+
+    return finalDetails; // Return the array of video details directly
   } catch (error) {
     const message = error.response?.data?.error?.message || error.message;
     return { message: message };
   }
 }
+
 
 async function searchYouTubeVideos(keyword, maxResults = 5) {
   try {
@@ -239,7 +244,7 @@ async function searchYouTubeVideos(keyword, maxResults = 5) {
     for (const video of videos) {
       finalDetails.push(await getVideoDetail(video.video_id));
     }
-    return JSON.stringify(finalDetails, null, 2);
+    return finalDetails
   } catch (error) {
     const message = error.response?.data?.error?.message || error.message;
     return { message: message };
@@ -327,10 +332,6 @@ app.get("/product/:asin", async (req, res) => {
   res.json(products);
 });
 
-
-
-
-
 const readJsonFilee = async (filePath) => {
   const data = await fs.promises.readFile(filePath, "utf8");
   return JSON.parse(data);
@@ -370,7 +371,6 @@ app.get("/productt/:asin", async (req, res) => {
     const twitterData = await readJsonFile(twitterFilePath);
     console.log("5");
 
-   
     // Convert Instagram images to base64
     for (const item of instagramData) {
       if (item.displayUrl) {
@@ -391,26 +391,26 @@ app.get("/productt/:asin", async (req, res) => {
         item.base64Image = await convertImageToBase64(item.twitterUrl);
       }
     }
-    
+
     console.log("6");
     // Uncomment and adapt the code below if you need to process descriptions and reviews
-    // let productInformation = [];
-    // let reviews = [];
+    let productInformation = [];
+    let reviews = [];
 
-    // if (products.product.description) {
-    //   const rewrittenDescription = await rewriteDescription(
-    //     products.product.description
-    //   );
-    //   productInformation.push(rewrittenDescription[0]);
-    // }
+    if (products.product.description) {
+      const rewrittenDescription = await rewriteDescription(
+        products.product.description
+      );
+      productInformation.push(rewrittenDescription[0]);
+    }
     console.log("7");
 
-    // if (
-    //   products.product.top_reviews &&
-    //   products.product.top_reviews.length > 0
-    // ) {
-    //   reviews = await rewriteReviews(products);
-    // }
+    if (
+      products.product.top_reviews &&
+      products.product.top_reviews.length > 0
+    ) {
+      reviews = await rewriteReviews(products);
+    }
     console.log("hello");
     console.log("1");
 
@@ -418,17 +418,17 @@ app.get("/productt/:asin", async (req, res) => {
     // Search YouTube shorts related to the product
     const keyword = products.product.title; // Use product name as keyword
     const maxResults = 5; // Number of shorts to retrieve
-    // const youtubeShorts = await searchYouTubeShorts(keyword, maxResults);
-    // const youtubeVideos = await searchYouTubeVideos(keyword, maxResults);
+    const youtubeShorts = await searchYouTubeShorts(keyword, maxResults);
+    const youtubeVideos = await searchYouTubeVideos(keyword, maxResults);
     console.log("8");
 
     // Construct the response object
     const response = {
       products,
-      // productInformation,
-      // reviews,
-      // youtubeShorts,
-      // youtubeVideos,
+      productInformation,
+      reviews,
+      youtubeShorts,
+      youtubeVideos,
       instagramData,
       tiktokData,
       twitterData,
